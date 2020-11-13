@@ -4,12 +4,13 @@
 #include "Vector3.h"
 #include "Material.h"
 class Sphere : public Object {
-public:
+private:
 	Vector3 center;
 	double radius;
 	std::shared_ptr<Material> material;
 
-	Sphere() {}
+public:
+	Sphere() : radius(0) {}
 	Sphere(Vector3 center_, double radius_, std::shared_ptr<Material> m) : center(center_), radius(radius_), material(m) {}
 
 	bool intersect(const Ray& r, double t_min, double t_max, HitInfo& hit) override {

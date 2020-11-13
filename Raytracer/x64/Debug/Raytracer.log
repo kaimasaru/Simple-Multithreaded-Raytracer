@@ -1,0 +1,39 @@
+﻿  Source.cpp
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Vector3.h(20,69): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Vector3.h(20,62): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Vector3.h(20,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Vector3.h(21,69): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Vector3.h(21,62): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Vector3.h(21,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Vector3.h(56,43): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Vector3.h(62,65): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Vector3.h(62,49): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Vector3.h(62,33): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\rgb.h(20,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\rgb.h(20,48): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\rgb.h(20,41): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\rgb.h(21,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\rgb.h(21,48): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\rgb.h(21,41): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Sphere.h(35,23): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Camera.h(27,8): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Camera.h(43,21): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Camera.h(43,18): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(42,62): warning C4244: 'argument': conversion from 'float' to 'unsigned char', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(42,53): warning C4244: 'argument': conversion from 'float' to 'unsigned char', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(42,44): warning C4244: 'argument': conversion from 'float' to 'unsigned char', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(66,57): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(72,51): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(72,47): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(132,52): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(132,48): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(162,27): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(179,107): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(181,102): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(182,104): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(183,110): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(199,34): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(260,214): warning C4244: 'argument': conversion from 'float' to 'unsigned char', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(260,172): warning C4244: 'argument': conversion from 'float' to 'unsigned char', possible loss of data
+C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\Raytracer\Source.cpp(260,130): warning C4244: 'argument': conversion from 'float' to 'unsigned char', possible loss of data
+  Raytracer.vcxproj -> C:\Users\808kb\Desktop\github\Simple-Multithreaded-Raytracer\x64\Debug\Raytracer.exe

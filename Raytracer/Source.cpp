@@ -7,12 +7,9 @@
 #include "Camera.h"
 #include "easyppm.h"
 #include <time.h>
-#include <thread>
-#include <mutex>
 #include <future>
 #include <chrono>
 #include <ctime>
-#include <list>
 
 struct block {
 	std::vector<std::vector<rgb>> pixelColors;
@@ -69,12 +66,6 @@ rgb basicRayColor(const Ray& r, Object& scene, int bounceCount) {
 	return rgb(1.0, 1.0, 1.0)*(1.0 - t) + rgb(0.5, 0.7, 1.0)*t;
 }
 
-void rayColorThread(rgb& color, const Ray& r, Object& scene, int bounceCount) {
-	color = color + basicRayColor(r, scene, bounceCount);
-}
-
-std::mutex mtx;
-
 rgb colorSample(int sampleCount, int x, int y, Camera& cam, ObjectList& scene) {
 	auto xd = x + randomDouble();
 	auto yd = y + randomDouble();
@@ -83,6 +74,7 @@ rgb colorSample(int sampleCount, int x, int y, Camera& cam, ObjectList& scene) {
 	return basicRayColor(temp1, scene, 0);
 }
 
+// Not really optimal waste of thread creation calls
 block threadedBlockthreadedSamples(int sampleCount, int penis, int poop, int x, int y, Camera& cam, ObjectList& scene) {
 	std::vector<std::future<rgb>> threadsSamples;
 	block b;
@@ -118,118 +110,127 @@ block threadedBlockthreadedSamples(int sampleCount, int penis, int poop, int x, 
 	return b;
 }
 
-block threadedBlock(int sampleCount, int penis, int poop, int x, int y, Camera& cam, ObjectList& scene, int x0, int y0) {
+block threadedBlock(int sampleCount, int blockX, int blockY, int xBlockScale, int yBlockScale, Camera& cam, ObjectList& scene) {
+	// Initialize important stuff
 	block b;
-	int yt = y;
-	while (yt < penis) {
-		int xt = x;
-		std::vector<rgb> pixels;
-		while (xt < poop) {
-			rgb color(0, 0, 0);
+	b.x = blockX;
+	b.y = blockY;
+	int xInit = blockX * xBlockScale;
+	int yInit = blockY * yBlockScale;
+	int xBound = xInit + xBlockScale;
+	int yBound = yInit + yBlockScale;
+
+
+	rgb color(0, 0, 0);
+	std::vector<rgb> pixels(xBlockScale);
+
+	for (int yt = yInit; yt < yBound; ++yt) {
+		for (int xt = xInit; xt < xBound; ++xt) {
 			for (int s = 0; s < sampleCount; ++s) {
 				auto xd = xt + randomDouble();
 				auto yd = yt + randomDouble();
-				Ray temp1(Vector3(0, 0, 0), cam.pixelToWorld(xd, yd));
-
-				color = color + basicRayColor(temp1, scene, 0);
+				Ray ray(Vector3(0, 0, 0), cam.pixelToWorld(xd, yd)); // Random ray per sample
+				//Ray ray = cam.getRay(xd, yd);
+				color = color + basicRayColor(ray, scene, 0);
 			}
-
 			auto scale = 1.0 / sampleCount;
 			color = color * scale;
-			color.r = sqrtf(color.r);
+			color.r = sqrtf(color.r); // Correct gamma to 2.0
 			color.g = sqrtf(color.g);
 			color.b = sqrtf(color.b);
-			//easyppm_set(ppm, xt, yt, easyppm_rgb(255 * clamp(color.r, 1.0), 255 * clamp(color.g, 1.0), 255 * clamp(color.b, 1.0)));
 
-			pixels.push_back(rgb(255 * clamp(color.r, 1.0), 255 * clamp(color.g, 1.0), 255 * clamp(color.b, 1.0)));
-			++xt;
+			auto index = xt - xInit;
+
+			pixels[index] = (rgb(255 * clamp(color.r, 1.0), 255 * clamp(color.g, 1.0), 255 * clamp(color.b, 1.0)));
+			color.zero();
 		}
-		++yt;
 		b.pixelColors.push_back(pixels);
 	}
-
-	b.x = x0;
-	b.y = y0;
 
 	return b;
 }
 
 int main() {
 
+	// Initialize important stuff
 	const auto aspectRatio = 16.0 / 9.0;
-	const int width = 400;
-	const int height = width;
+	const int width = 1920;
+	const int height = width / aspectRatio;
+	int sampleCount = 100;
+
+	int maxThreads = std::thread::hardware_concurrency();
+	std::cout << "Threads: " << maxThreads << std::endl;
+	std::vector<std::future<block>> threads;
+
+	// Width height fov
+	Camera cam(Vector3(-2, 2, 1), Vector3(0, 0, -1), Vector3(0, 0, -1), width, height, 70);
+
+	/** ! TO DO ! Custom ppm creation easy ppm is annoying ! TO DO ! **/
+	PPM ppm = easyppm_create(width, height, IMAGETYPE_PPM);
 
 	ObjectList scene;
 
-	scene.add(std::make_shared<Sphere>(Vector3(0, 0, -2), 0.5, std::make_shared<Lambertian>(rgb(0.7, 0.3, 0.3))));
-	scene.add(std::make_shared<Sphere>(Vector3(-1, 0, -2), 0.5, std::make_shared<Dielectric>(1.5)));
-	scene.add(std::make_shared<Sphere>(Vector3(1, 0, -2), 0.5, std::make_shared<Metal>(rgb(0.8, 0.6, 0.2), 0.6)));
-	scene.add(std::make_shared<Sphere>(Vector3(1.5, 0, -2), 0.6, std::make_shared<Metal>(rgb(0.3, 0.9, 0.4), 0.1)));
-	//for (int i = 0; i < 10; ++i) {
-	//	scene.add(std::make_shared<Sphere>(Vector3(randomDouble() - 0.5, randomDouble() + 0.5, fabs(randomDouble() - 1)), fabs(randomDouble()) * 0.7, std::make_shared<Lambertian>(rgb(fabs(randomDouble()), fabs(randomDouble()), fabs(randomDouble())))));
-	//}
+	/* ! TO DO !  Make a scene creation thing so these constructors don't litter main  ! TO DO ! */
+	// Creating the scene
+	scene.add(std::make_shared<Sphere>(Vector3(0, 0, -1), 0.5, std::make_shared<Lambertian>(rgb(0.7, 0.3, 0.3))));
+	scene.add(std::make_shared<Sphere>(Vector3(-1, 0, -1), 0.5, std::make_shared<Dielectric>(1.5)));
+	scene.add(std::make_shared<Sphere>(Vector3(1, 0, -1), 0.5, std::make_shared<Metal>(rgb(0.8, 0.6, 0.2), 0.6)));
+	scene.add(std::make_shared<Sphere>(Vector3(1.5, 0, -1), 0.6, std::make_shared<Metal>(rgb(0.3, 0.9, 0.4), 0.1)));
 	scene.add(std::make_shared<Sphere>(Vector3(0, -100.5, -1), 100, std::make_shared<Lambertian>(rgb(0.8, 0.8, 0))));
 
-	Camera cam(width, height, 70);
-
-	PPM ppm = easyppm_create(width, height, IMAGETYPE_PPM);
-
-	int sampleCount = 100;
-	int blockScale = 1;
-	int maxThreads = std::thread::hardware_concurrency();
-
-	for (int i = maxThreads; i > 0; --i) {
+	// Chunk the image into minimum number of blocks
+	int xBlockScale = 1;
+	int yBlockScale = 1;
+	for (unsigned int i = maxThreads; i > 0; --i) {
+		/** ! TO DO ! This logic does not scale for strange height/width proportions ! TO DO ! **/
 		if (width % i == 0 && height % i == 0) {
-			blockScale = width / i;
+			xBlockScale = width / i;
+			yBlockScale = height / i;
 			break;
 		}
 	}
-
-	std::vector<std::future<block>> threads;
-
-
-	int widthBlocks = width / blockScale;
-	int heightBlocks = height / blockScale;
-
+	int widthBlocks = width / xBlockScale;
+	int heightBlocks = height / yBlockScale;
 	std::vector<block> blockVec(widthBlocks * heightBlocks);
+	int blocksLeft = blockVec.size();
 
-	// Using time point and system_clock 
-	std::chrono::time_point<std::chrono::system_clock> start, end;
+	std::cout << "Blocks total: " << blocksLeft << std::endl;
 
-	start = std::chrono::system_clock::now();
+	// This part makes bechmarking and manual profiling easier
+	using namespace std::chrono;
+	time_point<system_clock> start, end;
+	start = system_clock::now();
+	time_t start_time = system_clock::to_time_t(start);
+	std::cout << "Started render at " << std::ctime(&start_time) << std::endl;
 
+	// For percentage output
 	int blocksDone = 0;
-	std::cout << "Starting render!" << std::endl;
+	int totalBlocks = widthBlocks * heightBlocks;
 	float percentage = 0, percentageLast = 0;
+
+	// Render loop
 	for (int j = 0; j < heightBlocks; ++j) {
 		int i = 0;
-		percentage = (float)blocksDone / (widthBlocks * heightBlocks) * 100.0;
 		while (i < widthBlocks) {
+			/* ! TO DO ! Better thread batching algorithm would be nice. This seems too simple to be efficient ! TO DO !*/
 			if (threads.size() < maxThreads) {
-				int xInit = i * blockScale;
-				int yInit = j * blockScale;
-				int xBound = xInit + blockScale;
-				int yBound = yInit + blockScale;
-				threads.push_back(std::async(std::launch::async, threadedBlock, sampleCount, yBound, xBound, xInit, yInit, std::ref<Camera>(cam), std::ref<ObjectList>(scene), i, j));
+				threads.push_back(std::async(std::launch::async, threadedBlock, sampleCount, i, j, xBlockScale, yBlockScale, std::ref<Camera>(cam), std::ref<ObjectList>(scene)));
 				++i;
 				++blocksDone;
 			}
-			for (int t = 0; t < threads.size(); ++t) {
-				if (threads[t].wait_for(std::chrono::seconds(-1)) == std::future_status::ready) {
-					block temp = threads[t].get();
-					blockVec[temp.x + (temp.y * widthBlocks)] = temp;
-					threads.erase(threads.begin() + t);
-					if (percentage - percentageLast > 1) {
-						std::cout << (int)percentage << "% completed." << std::endl;
-						percentageLast = percentage;
+			else {
+				for (int t = 0; t < threads.size(); ++t) {
+					if (threads[t].wait_for(std::chrono::seconds(-1)) == std::future_status::ready) {
+						block temp = threads[t].get();
+						blockVec[temp.x + temp.y * widthBlocks] = temp;
+						threads.erase(threads.begin() + t);
+						std::cout << "Blocks remaining: " << --blocksLeft << std::endl;
 					}
 				}
 			}
-			//threadedBlock(blockVec[++blockCount], sampleCount, (j * blockScale) + blockScale, (i * blockScale) + blockScale, i * blockScale, j * blockScale, std::ref<Camera>(cam), std::ref<ObjectList>(scene), &ppm);
 		}
 	}
-
+	// Reclaim last batch of threads
 	for (int i = 0; i < threads.size(); ++i) {
 		block temp = threads[i].get();
 		auto ind = temp.x + (temp.y * widthBlocks);
@@ -237,30 +238,28 @@ int main() {
 	}
 	threads.clear();
 
+	// End timing and output computation time
+	end = system_clock::now();
+	duration<double> elapsed_seconds = end - start;
+	time_t end_time = system_clock::to_time_t(end);
+	std::cout << "finished computation at " << std::ctime(&end_time)
+		<< "elapsed time: " << elapsed_seconds.count() << "s\n";
+
+	/* ! TO DO !  Make custom ppm writing function easyppm is heavy and annoying to use with rgb objects  ! TO DO ! */
 	for (int blockY = 0; blockY < heightBlocks; ++blockY) {
 		for (int blockX = 0; blockX < widthBlocks; ++blockX) {
 			auto blockIndex = blockX + (blockY * widthBlocks);
 			for (int y = 0; y < blockVec[blockIndex].pixelColors.size(); ++y) {
 				for (int x = 0; x < blockVec[blockIndex].pixelColors[y].size(); ++x) {
-					auto xPixel = x + (blockX * blockScale);
-					auto yPixel = y + (blockY * blockScale);
-					easyppm_set(&ppm, x + (blockX * blockScale), y + (blockY * blockScale), easyppm_rgb(blockVec[blockIndex].pixelColors[y][x].r, blockVec[blockIndex].pixelColors[y][x].g, blockVec[blockIndex].pixelColors[y][x].b));
+					auto xPixel = x + (blockX * xBlockScale);
+					auto yPixel = y + (blockY * yBlockScale);
+					easyppm_set(&ppm, x + (blockX * xBlockScale), y + (blockY * yBlockScale), easyppm_rgb(blockVec[blockIndex].pixelColors[y][x].r, blockVec[blockIndex].pixelColors[y][x].g, blockVec[blockIndex].pixelColors[y][x].b));
 				}
 			}
 		}
 	}
-
-	//easyppm_set(&ppm, xp, yp, easyppm_rgb(blockVec[x * y].pixelColors[y][x].r, blockVec[x * y].pixelColors[y][x].g, blockVec[x * y].pixelColors[y][x].b));
-	end = std::chrono::system_clock::now();
-
-	std::chrono::duration<double> elapsed_seconds = end - start;
-	std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-
-	std::cout << "finished computation at " << std::ctime(&end_time)
-		<< "elapsed time: " << elapsed_seconds.count() << "s\n";
-	
 	easyppm_write(&ppm, "image.ppm");
 	easyppm_destroy(&ppm);
- 
+
 	system("pause");
 }
