@@ -1,5 +1,6 @@
 # Simple-Multithreaded-Raytracer
 Simple ray tracer with multithreading WIP
+![image](https://user-images.githubusercontent.com/48833895/149240994-2b05e419-b730-4468-8d79-f53dba7baf07.jpg)
 
 ## Libraries used
 easy_ppm used for rendering to ppm files, I would like to include a more robust c++ graphics library for rendering to png or possibly realtime. STL Future.h used for multithreading and Chrono.h used for simple profiling.
